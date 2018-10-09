@@ -17,5 +17,10 @@ namespace BibliographyParser.Models
         public int PageTo { get; set; }
         public int Volume { get; set; }
         public int Part { get; set; }
+
+        /// <summary>
+        /// Digital Object Identifier (DOI) of an article.
+        /// </summary>
+        public string DOI { get; set; }
     }
 }
