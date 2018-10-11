@@ -56,6 +56,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Internals\RelayCommand.cs" />
     <Compile Include="ViewModels\BibliographyParserViewModel.cs" />
     <Compile Include="Views\BibliographyParser.xaml.cs">
       <DependentUpon>BibliographyParser.xaml</DependentUpon>

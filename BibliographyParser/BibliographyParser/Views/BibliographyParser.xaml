@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="BibliographyParser" Height="300" Width="500">
+        Title="BibliographyParser" Height="370" Width="600">
 
     <DockPanel>
         <!-- Header -->
@@ -32,36 +32,61 @@
         </Grid>
         <!-- Body -->
         <Grid Background="WhiteSmoke">
-            <StackPanel Orientation="Vertical" Margin="30,20">
-                <Grid Background="HotPink" Height="50">
+            <StackPanel Orientation="Vertical" Margin="30,10">
+                <TextBlock Text="Wybierz plik do przerobienia:" TextAlignment="Left" FontSize="14" Foreground="Black"/>
+                <Grid Background="HotPink" Height="40" Margin="0,5,0,10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="3*"/>
                         <ColumnDefinition Width="1*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBox MinWidth="3" 
+                    <TextBox Height="30"
                              Background="Ivory"
                              IsEnabled="False" 
-                             Text="{Binding TextFilePath}"
-                             Margin="10"/>
+                             Text="{Binding InputPath}"
+                             Padding="0,5"
+                             Margin="5"/>
                     <Button Grid.Column="1" 
                             Background="Ivory"
                             Content="Browse"
-                            Margin="0,10,10,10"
-                            Command="{Binding BrowseCommand}"/>
+                            Margin="0,5,10,5"
+                            Command="{Binding BrowseInputCommand}"/>
                 </Grid>
-                <Grid Height="80">
+                <TextBlock Text="Wybierz, gdzie ma trafić docelowy plik XSL:" TextAlignment="Left" FontSize="14" Foreground="Black"/>
+                <Grid Background="HotPink" Height="40" Margin="0,5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="3*"/>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Background="Ivory"
+                             IsEnabled="False" 
+                             Text="{Binding OutputPath}"
+                             Padding="0,5"
+                             Margin="5"/>
+                    <Button Grid.Column="1" 
+                            Background="Ivory"
+                            Content="Browse"
+                            Margin="0,5,10,5"
+                            Command="{Binding BrowseOutputCommand}"/>
+                </Grid>
+                <Grid Height="60">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <Button Background="Ivory"
                             Content="START"
                             Grid.Column="1"
-                            Margin="0,20"
+                            Margin="0,10,0,10"
+                            FontSize="20"
                             Command="{Binding StartCommand}"/>
                 </Grid>
-                <TextBlock Text="{Binding ResultText}" FontSize="18" TextAlignment="Center" Foreground="Black"/>
+                <TextBlock Height="40" 
+                           FontSize="14" 
+                           Text="{Binding ResultText}" 
+                           TextAlignment="Center" 
+                           Padding="0,10"
+                           Foreground="Black"/>
             </StackPanel>
         </Grid>
     </DockPanel>

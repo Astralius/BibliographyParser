@@ -1,21 +1,34 @@
-﻿using PropertyChanged;
-using System.Threading;
+﻿using BibliographyParser.Internals;
+using PropertyChanged;
+using System;
+using System.Windows.Input;
 
 namespace BibliographyParser.ViewModels
 {
     [AddINotifyPropertyChangedInterface]
     public class BibliographyParserViewModel
     {
-        public string TestString { get; set; } = string.Empty;
+        public string InpputPath { get; set; } = string.Empty;
+        public string OutputPath { get; set; } = $@"{Environment.GetFolderPath(Environment.SpecialFolder.Desktop)}\Bibliography.xsl";
+        public string ResultText { get; set; } = ":*";
 
-        public BibliographyParserViewModel()
+        public ICommand BrowseInputCommand { get; set; } = new RelayCommand(BrowseInput);   
+        public ICommand BrowseOutputCommand { get; set; } = new RelayCommand(BrowseOutput);
+        public ICommand StartCommand { get; set; } = new RelayCommand(Start);
+      
+        private static void BrowseInput()
         {
-            new Thread(() =>
-            {
-                Thread.CurrentThread.IsBackground = true;
-                Thread.Sleep(5000);
-                TestString = "Hello bindings!";
-            }).Start();
+            throw new NotImplementedException();
+        }
+
+        private static void BrowseOutput()
+        {
+            throw new NotImplementedException();
+        }
+
+        private static void Start()
+        {
+            throw new NotImplementedException();
         }
     }
 }
