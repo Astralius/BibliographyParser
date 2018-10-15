@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BibliographyParser.Utilities
+namespace XSLSerializer.Utilities
 {
     public static class Extensions
     {

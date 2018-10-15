@@ -2,10 +2,9 @@
 
 namespace XSLSerializer.Interfaces
 {
-    public interface IXSLCreator
+    public interface IBibliographyCreator
     {
-        void AddSource(Source article);
-        void AddSourcesArguments();
+        void AddSource(Source source);
         void ApplyChanges();
     }
 }
