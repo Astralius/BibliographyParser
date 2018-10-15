@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using XSLSerializer.Enums;
 
 namespace XSLSerializer.Models
 {
-    public class Source
+    public abstract class Source
     {
         private static readonly List<string> Tags = new List<string>();
-        
-        public Guid Guid { get; private set; }
+
+        public Guid Guid { get; private set; } = Guid.NewGuid();
+        public SourceType Type { get; protected set; }
         public IList<Person> Authors { get; set; } = new List<Person>();
         public IList<Person> Editors { get; set; } = new List<Person>();
         public string Tag => ComposeTag();      
@@ -21,11 +23,6 @@ namespace XSLSerializer.Models
         public string StandardCodeType { get; set; }
         public string Comment { get; set; }
         public int Volume { get; set; }
-
-        public Source()
-        {
-            this.Guid = Guid.NewGuid();
-        }
 
         private string ComposeTag()
         {
@@ -52,7 +49,7 @@ namespace XSLSerializer.Models
         {
             if (tag != null)
             {
-                int suffix = 0;
+                var suffix = 0;
                 while (Tags.Contains(tag) || tag.Equals(string.Empty))
                 {
                     suffix += 1;
