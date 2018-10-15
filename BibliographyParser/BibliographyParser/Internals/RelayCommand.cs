@@ -13,7 +13,6 @@ namespace BibliographyParser.Internals
 
         private readonly Func<bool> canExecute;
         private readonly Action executeAction;
-        private readonly Action<object> execute;
 
         public RelayCommand(Action executeAction, Func<bool> canExecuteFunc)
         {
