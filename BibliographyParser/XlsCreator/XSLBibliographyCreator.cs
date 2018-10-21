@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Xml;
 using XSLSerializer.Interfaces;
 using XSLSerializer.Models;
@@ -9,40 +10,56 @@ namespace XSLSerializer
 {
     public class XSLBibliographyCreator : IBibliographyCreator
     {
-        private const string bibliographyNamespace = "b";
+        private const string bibliographyPrefix = "b";
         private readonly string NotInitializedMessage = 
             $"You must first initialize this {nameof(XSLBibliographyCreator)} to use this method!";
+        
+        private XmlWriter XmlWriter;
 
-        private static XmlWriter xmlWriter;
-        private static bool initialized = false;
+        public bool Initialized { get; private set; }
+        public bool Changed { get; private set; }
 
         /// <summary>
         /// Opens a .xsl file on the specified path for editing and adds necessary heading elements.
         /// <para>Must be called before any other <see cref="XSLBibliographyCreator"/>'s method.</para>
         /// </summary>
         /// <param name="outputPath"></param>
-        public static void Initialize(string outputPath)
+        public void Initialize(string outputPath)
         {
             if (!IsValidXSLPath(outputPath))
             {
-                throw new ArgumentException("The provided path is not a valid XSL file path!");             
+                throw new ArgumentException("The provided path is not a valid XSL file path!");
             }
 
-            var settings = new XmlWriterSettings
-            {
-                Indent = false,
-                NewLineChars = string.Empty,
-                NewLineHandling = NewLineHandling.Replace,
-                NewLineOnAttributes = false,
-                WriteEndDocumentOnClose = true,
-                ConformanceLevel = ConformanceLevel.Document
-            };
-            xmlWriter = XmlWriter.Create(outputPath, settings);
-            AddOpeningSection(xmlWriter);
-            initialized = true;
+            XmlWriterSettings settings = GetXMLWriterSettings();
+
+            XmlWriter = XmlWriter.Create(outputPath, settings);
+            AddOpeningSection(XmlWriter);
+
+            Initialized = true;
+            Changed = false;
 
             bool IsValidXSLPath(string path)
                     => Path.GetExtension(path).EndsWith("xsl");
+        }
+       
+        /// <summary>
+        /// Redirects the output of all other <see cref="XSLBibliographyCreator"/>'s methods to a chosen <see cref="StringBuilder"/> object.
+        /// <para>Must be called before any other <see cref="XSLBibliographyCreator"/>'s method.</para>
+        /// </summary>
+        /// <param name="output"><see cref="StringBuilder"/> object for initialization of the XMLWriter.</param>
+        public void Initialize(StringWriter output)
+        {
+            if (output == null)
+            {
+                throw new ArgumentNullException("The provided output cannot be null!");
+            }
+
+            XmlWriter = XmlWriter.Create(output, GetXMLWriterSettings());
+            AddOpeningSection(XmlWriter);
+
+            Initialized = true;
+            Changed = false;
         }
 
         /// <summary>
@@ -51,7 +68,7 @@ namespace XSLSerializer
         /// <param name="source"><see cref="Source"/> object to be serialized to XSL.</param>
         public void AddSource(Source source)
         {
-            if (!initialized)
+            if (!Initialized)
             {
                 throw new InvalidOperationException(NotInitializedMessage);
             }
@@ -64,6 +81,8 @@ namespace XSLSerializer
             {
                 throw new NotSupportedException($"Adding this type of {nameof(Source)} is not supported");
             }
+
+            Changed = true;
         }
 
         /// <summary>
@@ -72,64 +91,88 @@ namespace XSLSerializer
         /// </summary>
         public void ApplyChanges()
         {
-            if (!initialized)
+            if (!Initialized)
             {
                 throw new InvalidOperationException(NotInitializedMessage);
             }
+            if (!Changed)
+            {
+                throw new InvalidOperationException("Attempted to apply changes, " +
+                    "but no changes have been made.");
+            }
 
-            xmlWriter.WriteEndElement();
-            xmlWriter.Close();
-            xmlWriter = null;
+            XmlWriter.WriteEndElement();
+            XmlWriter.Close();
+            XmlWriter = null;
 
-            initialized = false;
+            Initialized = false;
+        }
+
+        private static XmlWriterSettings GetXMLWriterSettings()
+        {
+            return new XmlWriterSettings
+            {
+                Indent = false,
+                NewLineChars = string.Empty,
+                NewLineHandling = NewLineHandling.Replace,
+                NewLineOnAttributes = false,
+                WriteEndDocumentOnClose = true,
+                ConformanceLevel = ConformanceLevel.Document,
+                CloseOutput = true
+            };
         }
 
         private static void AddOpeningSection(XmlWriter writer)
         {
-            writer.WriteStartElement("Sources", bibliographyNamespace);
+            writer.WriteStartElement(bibliographyPrefix, "Sources", "http://schemas.openxmlformats.org/officeDocument/2006/bibliography");
             writer.WriteAttributeString("SelectedStyle", "");
-            writer.WriteAttributeString(bibliographyNamespace, "xmlns", "http://schemas.openxmlformats.org/officeDocument/2006/bibliography");
-            writer.WriteAttributeString("xmlns", "http://schemas.openxmlformats.org/officeDocument/2006/bibliography");           
+            writer.WriteAttributeString("xmlns", bibliographyPrefix, null, "http://schemas.openxmlformats.org/officeDocument/2006/bibliography");
+            writer.WriteAttributeString("xmlns", null, "http://schemas.openxmlformats.org/officeDocument/2006/bibliography");
         }
 
         private void AddJournalArticle(JournalArticle article)
         {
-            xmlWriter.WriteStartElement("Source", bibliographyNamespace);
-            xmlWriter.WriteElementString("Tag", bibliographyNamespace, article.Tag);
-            xmlWriter.WriteElementString("SourceType", bibliographyNamespace, article.Type.ToString());
-            xmlWriter.WriteElementString("Guid", bibliographyNamespace, article.Guid.ToString());
-            xmlWriter.WriteElementString("Title", bibliographyNamespace, article.Title);            
-            xmlWriter.WriteElementString("Year", bibliographyNamespace, article.Year);
-            xmlWriter.WriteElementString("City", bibliographyNamespace, article.City);
-            xmlWriter.WriteElementString("Publisher", bibliographyNamespace, article.Publisher);
-            xmlWriter.WriteElementString("JournalName", bibliographyNamespace, article.JournalName);
-            xmlWriter.WriteElementString("Month", bibliographyNamespace, article.Month);
-            xmlWriter.WriteElementString("Volume", bibliographyNamespace, article.Volume.ToString());
-            xmlWriter.WriteElementString("Issue", bibliographyNamespace, article.Issue.ToString());
+            XmlWriter.WriteStartElement(bibliographyPrefix, "Source", null);
+            XmlWriter.WriteElementString(bibliographyPrefix, "Tag", null, article.Tag);
+            XmlWriter.WriteElementString(bibliographyPrefix, "SourceType", null, article.Type.ToString());
+            XmlWriter.WriteElementString(bibliographyPrefix, "Guid", null, article.Guid.ToString());
+            XmlWriter.WriteElementString(bibliographyPrefix, "Title", null, article.Title);            
+            XmlWriter.WriteElementString(bibliographyPrefix, "PeriodicalTitle", null, article.JournalName);
+            XmlWriter.WriteElementString(bibliographyPrefix, "Year", null, article.Year);
+            XmlWriter.WriteElementString(bibliographyPrefix, "Month", null, article.Month);
+            XmlWriter.WriteElementString(bibliographyPrefix, "Pages", null, article.Pages);
+            XmlWriter.WriteElementString(bibliographyPrefix, "Volume", null, article.Volume.ToString());
+            XmlWriter.WriteElementString(bibliographyPrefix, "Issue", null, article.Issue.ToString());
 
-            xmlWriter.WriteStartElement("Author", bibliographyNamespace);
+            XmlWriter.WriteStartElement(bibliographyPrefix, "Author", null);
             AddPersons("Author", article.Authors);
             AddPersons("Editor", article.Editors);
-            xmlWriter.WriteEndElement();
+            XmlWriter.WriteEndElement();
 
-            xmlWriter.WriteElementString("Day", bibliographyNamespace, article.Day);
-            xmlWriter.WriteElementString("Pages", bibliographyNamespace, article.Pages);
+            XmlWriter.WriteElementString(bibliographyPrefix, "City", null, article.City);
+            XmlWriter.WriteElementString(bibliographyPrefix, "Day", null, article.Day);
+            XmlWriter.WriteElementString(bibliographyPrefix, "Publisher", null, article.Publisher);
+            XmlWriter.WriteElementString(bibliographyPrefix, "Edition", null, article.Edition);
+            XmlWriter.WriteElementString(bibliographyPrefix, "ShortTitle", null, article.ShortTitle);
+            XmlWriter.WriteElementString(bibliographyPrefix, "StandardNumber", null, article.StandardNumber);
+            XmlWriter.WriteElementString(bibliographyPrefix, "Comments", null, article.Comments);
+            XmlWriter.WriteElementString(bibliographyPrefix, "JournalName", null, article.JournalName);
         }
 
         private void AddPersons(string groupName, IList<Person> persons)
         {
-            xmlWriter.WriteStartElement(groupName, bibliographyNamespace);
-            xmlWriter.WriteStartElement("NameList", bibliographyNamespace);
+            XmlWriter.WriteStartElement(bibliographyPrefix, groupName, null);
+            XmlWriter.WriteStartElement(bibliographyPrefix, "NameList", null);
             foreach(var person in persons)
             {
-                xmlWriter.WriteStartElement("Person", bibliographyNamespace);
-                xmlWriter.WriteElementString("Last", bibliographyNamespace, person.Last);
-                xmlWriter.WriteElementString("Middle", bibliographyNamespace, person.Middle);
-                xmlWriter.WriteElementString("First", bibliographyNamespace, person.First);
-                xmlWriter.WriteEndElement();
+                XmlWriter.WriteStartElement(bibliographyPrefix, "Person", null);
+                XmlWriter.WriteElementString(bibliographyPrefix, "Last", null, person.Last);
+                XmlWriter.WriteElementString(bibliographyPrefix, "Middle", null, person.Middle);
+                XmlWriter.WriteElementString(bibliographyPrefix, "First", null, person.First);
+                XmlWriter.WriteEndElement();
             }
-            xmlWriter.WriteEndElement();
-            xmlWriter.WriteEndElement();
+            XmlWriter.WriteEndElement();
+            XmlWriter.WriteEndElement();
         }
     }
 }

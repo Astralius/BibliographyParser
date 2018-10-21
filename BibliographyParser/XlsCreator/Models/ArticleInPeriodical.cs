@@ -8,7 +8,6 @@ namespace XSLSerializer.Models
     public class ArticleInPeriodical : Article
     {
         public string PeriodicalTitle { get; set; }
-        public string Edition { get; set; }
         
         public ArticleInPeriodical() : base()
         {

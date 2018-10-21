@@ -7,6 +7,7 @@ namespace XSLSerializer.Models
     /// </summary>
     public class JournalArticle : Article
     {
+        public string Edition { get; set; }
         public string JournalName { get; set; }
         
         public JournalArticle() : base()

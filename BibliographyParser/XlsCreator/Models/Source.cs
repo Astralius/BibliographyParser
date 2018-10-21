@@ -9,7 +9,7 @@ namespace XSLSerializer.Models
     {
         private static readonly List<string> Tags = new List<string>();
 
-        public Guid Guid { get; private set; } = Guid.NewGuid();
+        public string Guid { get; set; } = $"{{{System.Guid.NewGuid().ToString().ToUpper()}}}";
         public SourceType Type { get; protected set; }
         public IList<Person> Authors { get; set; } = new List<Person>();
         public IList<Person> Editors { get; set; } = new List<Person>();
@@ -20,8 +20,8 @@ namespace XSLSerializer.Models
         public string Year { get; set; }
         public string City { get; set; }
         public string Pages { get; set; }
-        public string StandardCodeType { get; set; }
-        public string Comment { get; set; }
+        public string StandardNumber { get; set; }
+        public string Comments { get; set; }
         public int Volume { get; set; }
 
         private string ComposeTag()
