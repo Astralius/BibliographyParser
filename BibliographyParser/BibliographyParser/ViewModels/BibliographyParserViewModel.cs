@@ -1,6 +1,8 @@
 ﻿using BibliographyParser.Internals;
+using Microsoft.Win32;
 using PropertyChanged;
 using System;
+using System.IO;
 using System.Windows.Input;
 
 namespace BibliographyParser.ViewModels
@@ -8,25 +10,70 @@ namespace BibliographyParser.ViewModels
     [AddINotifyPropertyChangedInterface]
     public class BibliographyParserViewModel
     {
-        public string InpputPath { get; set; } = string.Empty;
-        public string OutputPath { get; set; } = $@"{Environment.GetFolderPath(Environment.SpecialFolder.Desktop)}\Bibliography.xsl";
+        public BibliographyParserViewModel()
+        {
+            this.BrowseInputCommand = new RelayCommand(BrowseInput);
+            this.BrowseOutputCommand = new RelayCommand(BrowseOutput);
+            this.StartCommand = new RelayCommand(Start);
+        }
+
+        public string InputPath { get; set; } = string.Empty;
+        public string OutputPath { get; set; } = string.Empty;
         public string ResultText { get; set; } = ":*";
 
-        public ICommand BrowseInputCommand { get; set; } = new RelayCommand(BrowseInput);   
-        public ICommand BrowseOutputCommand { get; set; } = new RelayCommand(BrowseOutput);
-        public ICommand StartCommand { get; set; } = new RelayCommand(Start);
+        public ICommand BrowseInputCommand { get; set; }
+        public ICommand BrowseOutputCommand { get; set; }
+        public ICommand StartCommand { get; set; } 
       
-        private static void BrowseInput()
+        private void BrowseInput()
         {
-            throw new NotImplementedException();
+            var dialog = new OpenFileDialog()
+            {
+                Title = "Wybierz plik do przerobienia",
+                Filter = "txt files (*.txt)|*.txt",
+                DefaultExt = ".txt",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                ShowReadOnly = false,
+                Multiselect = false,
+                AddExtension = true,
+                CheckFileExists = true,
+                CheckPathExists = true,
+                ValidateNames = true
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                InputPath = dialog.FileName;
+            }
         }
 
-        private static void BrowseOutput()
+        private void BrowseOutput()
         {
-            throw new NotImplementedException();
+            var officeBibliographyFilesPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "Microsoft",
+                    "Bibliography");
+
+            var dialog = new SaveFileDialog()
+            {
+                Title = "Gdzie ma trafić przerobiona bibliografia?",
+                Filter = "xml files (*.xml)|*.xml",
+                DefaultExt = ".xml",
+                FileName = "Sources",
+                InitialDirectory = officeBibliographyFilesPath,
+                AddExtension = true,
+                ValidateNames = true,
+                CreatePrompt = true,
+                OverwritePrompt = true
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                OutputPath = dialog.FileName;
+            }
         }
 
-        private static void Start()
+        private void Start()
         {
             throw new NotImplementedException();
         }
