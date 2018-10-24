@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 
-namespace XSLSerializer.Utilities
+namespace MSOfficeBibliographySerializer.Utilities
 {
     public static class Extensions
     {

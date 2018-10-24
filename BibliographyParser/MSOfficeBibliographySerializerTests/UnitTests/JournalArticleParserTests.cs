@@ -1,9 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MSOfficeBibliographySerializer;
 using System;
 using System.Text;
-using XSLSerializer;
 
-namespace XSLSerializerTests.UnitTests
+namespace MSOfficeBibliographySerializerTests.UnitTests
 {
     [TestClass]
     public class JournalArticleParserTests

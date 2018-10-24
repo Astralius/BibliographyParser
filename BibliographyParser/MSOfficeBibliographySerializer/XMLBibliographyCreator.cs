@@ -1,18 +1,18 @@
-﻿using System;
+﻿using MSOfficeBibliographySerializer.Interfaces;
+using MSOfficeBibliographySerializer.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
-using XSLSerializer.Interfaces;
-using XSLSerializer.Models;
 
-namespace XSLSerializer
+namespace MSOfficeBibliographySerializer
 {
-    public class XSLBibliographyCreator : IBibliographyCreator
+    public class XMLBibliographyCreator : IBibliographyCreator
     {
         private const string bibliographyPrefix = "b";
         private readonly string NotInitializedMessage = 
-            $"You must first initialize this {nameof(XSLBibliographyCreator)} to use this method!";
+            $"You must first initialize this {nameof(XMLBibliographyCreator)} to use this method!";
         
         private XmlWriter XmlWriter;
 
@@ -21,7 +21,7 @@ namespace XSLSerializer
 
         /// <summary>
         /// Opens a .xsl file on the specified path for editing and adds necessary heading elements.
-        /// <para>Must be called before any other <see cref="XSLBibliographyCreator"/>'s method.</para>
+        /// <para>Must be called before any other <see cref="XMLBibliographyCreator"/>'s method.</para>
         /// </summary>
         /// <param name="outputPath"></param>
         public void Initialize(string outputPath)
@@ -44,8 +44,8 @@ namespace XSLSerializer
         }
        
         /// <summary>
-        /// Redirects the output of all other <see cref="XSLBibliographyCreator"/>'s methods to a chosen <see cref="StringBuilder"/> object.
-        /// <para>Must be called before any other <see cref="XSLBibliographyCreator"/>'s method.</para>
+        /// Redirects the output of all other <see cref="XMLBibliographyCreator"/>'s methods to a chosen <see cref="StringBuilder"/> object.
+        /// <para>Must be called before any other <see cref="XMLBibliographyCreator"/>'s method.</para>
         /// </summary>
         /// <param name="output"><see cref="StringBuilder"/> object for initialization of the XMLWriter.</param>
         public void Initialize(StringWriter output)

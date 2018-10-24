@@ -7,8 +7,8 @@
     <ProjectGuid>{DBB98B83-B0FF-4AB5-892F-254DB20473A5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>XSLSerializerTests</RootNamespace>
-    <AssemblyName>XSLSerializerTests</AssemblyName>
+    <RootNamespace>MSOfficeBibliographySerializerTests</RootNamespace>
+    <AssemblyName>MSOfficeBibliographySerializerTests</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -63,12 +63,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\XlsCreator\XSLSerializer.csproj">
-      <Project>{BF0126C0-CAF5-4A9F-9898-1245C56C54A4}</Project>
-      <Name>XSLSerializer</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Choose>

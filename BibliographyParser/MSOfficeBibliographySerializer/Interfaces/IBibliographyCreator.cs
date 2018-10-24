@@ -1,6 +1,6 @@
-﻿using XSLSerializer.Models;
+﻿using MSOfficeBibliographySerializer.Models;
 
-namespace XSLSerializer.Interfaces
+namespace MSOfficeBibliographySerializer.Interfaces
 {
     public interface IBibliographyCreator
     {

@@ -1,14 +1,14 @@
-﻿using System;
+﻿using MSOfficeBibliographySerializer.Interfaces;
+using MSOfficeBibliographySerializer.Models;
+using MSOfficeBibliographySerializer.Utilities;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using XSLSerializer.Interfaces;
-using XSLSerializer.Models;
-using XSLSerializer.Utilities;
 
-namespace XSLSerializer
+namespace MSOfficeBibliographySerializer
 {
     public class JournalArticleParser : IBibliographyParser<JournalArticle>
     {

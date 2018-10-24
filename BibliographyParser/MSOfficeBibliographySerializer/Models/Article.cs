@@ -1,4 +1,4 @@
-﻿namespace XSLSerializer.Models
+﻿namespace MSOfficeBibliographySerializer.Models
 {
     /// <summary>
     /// Model class representing a single science article.

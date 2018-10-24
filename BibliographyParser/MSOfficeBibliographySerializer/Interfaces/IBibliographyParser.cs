@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 
-namespace XSLSerializer.Interfaces
+namespace MSOfficeBibliographySerializer.Interfaces
 {
     public interface IBibliographyParser<T>
     {

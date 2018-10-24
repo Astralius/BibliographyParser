@@ -1,6 +1,6 @@
-﻿using XSLSerializer.Enums;
+﻿using MSOfficeBibliographySerializer.Enums;
 
-namespace XSLSerializer.Models
+namespace MSOfficeBibliographySerializer.Models
 {
     /// <summary>
     /// Model class representing a single article in a science journal.

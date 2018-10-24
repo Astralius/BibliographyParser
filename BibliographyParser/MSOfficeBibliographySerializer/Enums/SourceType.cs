@@ -1,4 +1,4 @@
-﻿namespace XSLSerializer.Enums
+﻿namespace MSOfficeBibliographySerializer.Enums
 {
     public enum SourceType
     {

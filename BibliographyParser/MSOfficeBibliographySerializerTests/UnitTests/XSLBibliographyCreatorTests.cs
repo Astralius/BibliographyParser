@@ -1,12 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MSOfficeBibliographySerializer;
+using MSOfficeBibliographySerializer.Models;
+using MSOfficeBibliographySerializerTests.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using XSLSerializer;
-using XSLSerializer.Models;
-using XSLSerializerTests.Utilities;
 
-namespace XSLSerializerTests.UnitTests
+namespace MSOfficeBibliographySerializerTests.UnitTests
 {
     [TestClass()]
     public class XSLBibliographyCreatorTests
@@ -79,7 +79,7 @@ namespace XSLSerializerTests.UnitTests
         public void Initialize_InvalidPath_Throws()
         {
             var invalidPath = "*";
-            new XSLBibliographyCreator().Initialize(invalidPath);
+            new XMLBibliographyCreator().Initialize(invalidPath);
         }
 
         [TestMethod]
@@ -87,34 +87,34 @@ namespace XSLSerializerTests.UnitTests
         public void Initialize_InvalidFileExtension_Throws()
         {
             var pathWithInvalidExtension = Path.Combine(Path.GetTempPath(), "Example.bmp");
-            new XSLBibliographyCreator().Initialize(pathWithInvalidExtension);
+            new XMLBibliographyCreator().Initialize(pathWithInvalidExtension);
         }
 
         [TestMethod]
         public void Initialize_ValidFileExtension_Passes()
         {
-            new XSLBibliographyCreator().Initialize(ValidXSLFilePath);
+            new XMLBibliographyCreator().Initialize(ValidXSLFilePath);
         }
 
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void AddSource_NotInitialized_Throws()
         {
-            new XSLBibliographyCreator().AddSource(fakeJournalArticle);
+            new XMLBibliographyCreator().AddSource(fakeJournalArticle);
         }
 
         [TestMethod]
         [ExpectedException(typeof(NotSupportedException))]
         public void AddSource_UnsupportedSource_Throws()
         {
-            XSLBibliographyCreator creator = GetInitializedCreator();
+            XMLBibliographyCreator creator = GetInitializedCreator();
             creator.AddSource(fakeArticleInPeriodical);
         }
 
         [TestMethod]
         public void AddSource_SupportedSource_Passes()
         {
-            XSLBibliographyCreator creator = GetInitializedCreator();
+            XMLBibliographyCreator creator = GetInitializedCreator();
             creator.AddSource(fakeJournalArticle);
         }
 
@@ -122,7 +122,7 @@ namespace XSLSerializerTests.UnitTests
         [ExpectedException(typeof(InvalidOperationException))]
         public void ApplyChanges_NotInitialized_Throws()
         {
-            var creator = new XSLBibliographyCreator();
+            var creator = new XMLBibliographyCreator();
             creator.ApplyChanges();
         }
 
@@ -130,23 +130,23 @@ namespace XSLSerializerTests.UnitTests
         [ExpectedException(typeof(InvalidOperationException))]
         public void ApplyChanges_NoChanges_Throws()
         {
-            XSLBibliographyCreator creator = GetInitializedCreator();
+            XMLBibliographyCreator creator = GetInitializedCreator();
             creator.ApplyChanges();
         }
 
         [TestMethod]
         public void ApplyChanges_SingleValidSource_OutputsCorrectXSL()
         {
-            XSLBibliographyCreator creator = GetInitializedCreator();
+            XMLBibliographyCreator creator = GetInitializedCreator();
             creator.AddSource(fakeJournalArticle);
             creator.ApplyChanges();
 
             Assert.AreEqual(ValidXSLOutputContents, writer.ToString());     
         }
 
-        private XSLBibliographyCreator GetInitializedCreator()
+        private XMLBibliographyCreator GetInitializedCreator()
         {
-            var creator = new XSLBibliographyCreator();
+            var creator = new XMLBibliographyCreator();
             creator.Initialize(writer); // using StringBuilder overload to not affect file system.
             return creator;
         }
