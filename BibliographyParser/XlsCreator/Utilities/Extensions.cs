@@ -1,9 +1,17 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 
 namespace XSLSerializer.Utilities
 {
     public static class Extensions
     {
+        private const string RomanMatchingRegex = @"^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$";
+
+        /// <summary>
+        /// Converts given integer number to its corresponding Roman numeral.
+        /// </summary>
+        /// <param name="decimalNumber">Decimal number to convert.</param>
+        /// <returns>String representation of the conversion (Roman numeral).</returns>
         public static string ToRoman(this int decimalNumber)
         {
             if (decimalNumber > 3999)
@@ -27,6 +35,11 @@ namespace XSLSerializer.Utilities
                     .Replace(new string('I', 4), "IV");
         }
 
+        /// <summary>
+        /// Converts given Roman numeral to an integer.
+        /// </summary>
+        /// <param name="romanNumber">String representation of a Roman numeral to convert.</param>
+        /// <returns>Integer result of the conversion (decimal number).</returns>
         public static int FromRoman(this string romanNumber)
         {
             var checkString = romanNumber.Trim(new char[] { 'I', 'V', 'X', 'L', 'D', 'C', 'M' });
@@ -49,6 +62,16 @@ namespace XSLSerializer.Utilities
                     .Replace("D", new string('I', 500))
                     .Replace("C", new string('I', 100))
                     .Replace("M", new string('I', 1000)).Length;
+        }
+
+        /// <summary>
+        /// Checks if the given string represents a valid Roman numeral.
+        /// </summary>
+        /// <param name="stringToCheck"></param>
+        /// <returns>True, if the string represents a valid Roman numeral.</returns>
+        public static bool IsRomanNumber(this string stringToCheck)
+        {
+            return Regex.IsMatch(stringToCheck, RomanMatchingRegex);
         }
     }
 }

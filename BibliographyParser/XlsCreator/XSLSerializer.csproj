@@ -41,6 +41,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Interfaces\IBibliographyCreator.cs" />
+    <Compile Include="Interfaces\IBibliographyParser.cs" />
+    <Compile Include="JournalArticleParser.cs" />
     <Compile Include="Models\Article.cs" />
     <Compile Include="Models\JournalArticle.cs" />
     <Compile Include="Models\ArticleInPeriodical.cs" />

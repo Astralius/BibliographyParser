@@ -56,9 +56,10 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="UnitTests\JournalArticleParserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\UTF8StringWriter.cs" />
-    <Compile Include="XSLBibliographyCreatorTests.cs" />
+    <Compile Include="UnitTests\XSLBibliographyCreatorTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -2,11 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using XSLSerializer;
 using XSLSerializer.Models;
 using XSLSerializerTests.Utilities;
 
-namespace XSLSerializer.Tests
+namespace XSLSerializerTests.UnitTests
 {
     [TestClass()]
     public class XSLBibliographyCreatorTests
