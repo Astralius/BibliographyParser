@@ -64,7 +64,12 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\MSOfficeBibliographySerializer\MSOfficeBibliographySerializer.csproj">
+      <Project>{bf0126c0-caf5-4a9f-9898-1245c56c54a4}</Project>
+      <Name>MSOfficeBibliographySerializer</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
