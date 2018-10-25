@@ -48,14 +48,14 @@ namespace MSOfficeBibliographySerializer
             #endregion
             #region Title/Subtitle
 
-            // Since title section can contain dots, we need to skip over to the end of publisher section to find it out.
-            var titleAndPublisherSectionsLength = GetEndIndexOfPublisherSection(remainder) + 1;
-            var titleAndPublisherSections = remainder.Substring(0, titleAndPublisherSectionsLength);
+            // Since title section can contain dots, we need to skip over to the end of Journal name/year section to find it out.
+            var titleAndJournalNameSectionsLength = GetEndIndexOfPublisherSection(remainder) + 1;
+            var titleAndJournalNameSections = remainder.Substring(0, titleAndJournalNameSectionsLength);
 
-            var titleSectionLength = titleAndPublisherSections.LastIndexOf('.') + 1;
+            var titleSectionLength = titleAndJournalNameSections.LastIndexOf('.') + 1;
             if (titleSectionLength > 1)
             {
-                result.Title = titleAndPublisherSections.Substring(0, titleSectionLength).Trim();
+                result.Title = titleAndJournalNameSections.Substring(0, titleSectionLength).Trim();
                 remainder = remainder.Remove(0, titleSectionLength);
             }
             else
@@ -66,8 +66,8 @@ namespace MSOfficeBibliographySerializer
             #endregion
             #region Year
 
-            var publisherSectionLength = titleAndPublisherSectionsLength - titleSectionLength;
-            if (publisherSectionLength > 0)
+            var JournalNameSectionLength = titleAndJournalNameSectionsLength - titleSectionLength;
+            if (JournalNameSectionLength > 0)
             {
                 string year = ParsePublicationYear(remainder);
                 var yearIndex = remainder.IndexOf(year + ";");
@@ -83,13 +83,13 @@ namespace MSOfficeBibliographySerializer
             }
 
             #endregion
-            #region Publisher
+            #region JournalName
          
-            var publisherStringLength = publisherSectionLength - result.Year.Length - 1;
-            if (publisherStringLength > 0)
+            var JournalNameStringLength = JournalNameSectionLength - result.Year.Length - 1;
+            if (JournalNameStringLength > 0)
             {
-                result.Publisher = remainder.Substring(0, publisherStringLength).Trim();
-                remainder = remainder.Remove(0, publisherSectionLength);
+                result.JournalName = remainder.Substring(0, JournalNameStringLength).Trim();
+                remainder = remainder.Remove(0, JournalNameSectionLength);
             }
             else
             {
@@ -108,7 +108,7 @@ namespace MSOfficeBibliographySerializer
                 var issueMatch = Regex.Match(split[0], IssueMatchingRegex);
                 if (issueMatch.Success)
                 {
-                    var volumeString = remainder.Substring(0, issueMatch.Index);
+                    var volumeString = remainder.Substring(0, issueMatch.Index - 1);
                     result.Volume = ParseVolume(volumeString.Trim());
                     result.Issue = int.Parse(issueMatch.Value);
                 }

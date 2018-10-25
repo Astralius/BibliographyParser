@@ -109,5 +109,11 @@
       <Version>2.5.13</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MSOfficeBibliographySerializer\MSOfficeBibliographySerializer.csproj">
+      <Project>{bf0126c0-caf5-4a9f-9898-1245c56c54a4}</Project>
+      <Name>MSOfficeBibliographySerializer</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,7 +1,10 @@
 ﻿using BibliographyParser.Internals;
 using Microsoft.Win32;
+using MSOfficeBibliographySerializer;
+using MSOfficeBibliographySerializer.Models;
 using PropertyChanged;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows.Input;
 
@@ -75,7 +78,49 @@ namespace BibliographyParser.ViewModels
 
         private void Start()
         {
-            throw new NotImplementedException();
+            if (PathsSelected())
+            {
+                ResultText = string.Empty;
+                IList<JournalArticle> sources = new List<JournalArticle>();
+
+                // Convert from text to objects:
+                try
+                {
+                    var parser = new JournalArticleParser();
+                    sources = parser.ParseFromFile(InputPath);
+                }
+                catch (Exception)
+                {
+                    ResultText = "BŁĄD podczas zczytywania pliku .txt";
+                    return;
+                }
+
+                // Convert from objects to MS Office bibliography XML file:
+                try
+                {
+                    var XMLCreator = new XMLBibliographyCreator();
+                    XMLCreator.Initialize(OutputPath);
+                    foreach (Source source in sources)
+                    {
+                        XMLCreator.AddSource(source);
+                    }
+                    XMLCreator.ApplyChanges();
+                }
+                catch (Exception)
+                {
+                    ResultText = "BŁĄD podczas zapisywania pliku .xml";
+                    return;
+                }
+            }
+            else
+            {
+                ResultText = "BŁĄD! Najpierw wybierz plik wejściowy i wyjściowy.";
+                return;
+            }
+
+            ResultText = "Plik przekonwertowany pomyślnie! :)";
+
+            bool PathsSelected() => !string.IsNullOrEmpty(InputPath) && !string.IsNullOrEmpty(OutputPath);
         }
     }
 }

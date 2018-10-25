@@ -26,7 +26,7 @@ namespace MSOfficeBibliographySerializer
         /// <param name="outputPath"></param>
         public void Initialize(string outputPath)
         {
-            if (!IsValidXSLPath(outputPath))
+            if (!IsValidXMLPath(outputPath))
             {
                 throw new ArgumentException("The provided path is not a valid XSL file path!");
             }
@@ -39,8 +39,8 @@ namespace MSOfficeBibliographySerializer
             Initialized = true;
             Changed = false;
 
-            bool IsValidXSLPath(string path)
-                    => Path.GetExtension(path).EndsWith("xsl");
+            bool IsValidXMLPath(string path)
+                    => Path.GetExtension(path).EndsWith("xml");
         }
        
         /// <summary>
@@ -102,6 +102,7 @@ namespace MSOfficeBibliographySerializer
             }
 
             XmlWriter.WriteEndElement();
+            XmlWriter.WriteEndDocument();
             XmlWriter.Close();
             XmlWriter = null;
 
@@ -116,7 +117,6 @@ namespace MSOfficeBibliographySerializer
                 NewLineChars = string.Empty,
                 NewLineHandling = NewLineHandling.Replace,
                 NewLineOnAttributes = false,
-                WriteEndDocumentOnClose = true,
                 ConformanceLevel = ConformanceLevel.Document,
                 CloseOutput = true
             };
@@ -124,6 +124,7 @@ namespace MSOfficeBibliographySerializer
 
         private static void AddOpeningSection(XmlWriter writer)
         {
+            writer.WriteStartDocument();
             writer.WriteStartElement(bibliographyPrefix, "Sources", "http://schemas.openxmlformats.org/officeDocument/2006/bibliography");
             writer.WriteAttributeString("SelectedStyle", "");
             writer.WriteAttributeString("xmlns", bibliographyPrefix, null, "http://schemas.openxmlformats.org/officeDocument/2006/bibliography");
@@ -139,6 +140,7 @@ namespace MSOfficeBibliographySerializer
             XmlWriter.WriteElementString(bibliographyPrefix, "Title", null, article.Title);            
             XmlWriter.WriteElementString(bibliographyPrefix, "PeriodicalTitle", null, article.JournalName);
             XmlWriter.WriteElementString(bibliographyPrefix, "Year", null, article.Year);
+            if (!string.IsNullOrEmpty(article.Month))
             XmlWriter.WriteElementString(bibliographyPrefix, "Month", null, article.Month);
             XmlWriter.WriteElementString(bibliographyPrefix, "Pages", null, article.Pages);
             XmlWriter.WriteElementString(bibliographyPrefix, "Volume", null, article.Volume.ToString());
@@ -146,17 +148,19 @@ namespace MSOfficeBibliographySerializer
 
             XmlWriter.WriteStartElement(bibliographyPrefix, "Author", null);
             AddPersons("Author", article.Authors);
-            AddPersons("Editor", article.Editors);
+            if (article.Editors.Count > 0) AddPersons("Editor", article.Editors);
             XmlWriter.WriteEndElement();
 
-            XmlWriter.WriteElementString(bibliographyPrefix, "City", null, article.City);
-            XmlWriter.WriteElementString(bibliographyPrefix, "Day", null, article.Day);
-            XmlWriter.WriteElementString(bibliographyPrefix, "Publisher", null, article.Publisher);
-            XmlWriter.WriteElementString(bibliographyPrefix, "Edition", null, article.Edition);
-            XmlWriter.WriteElementString(bibliographyPrefix, "ShortTitle", null, article.ShortTitle);
-            XmlWriter.WriteElementString(bibliographyPrefix, "StandardNumber", null, article.StandardNumber);
-            XmlWriter.WriteElementString(bibliographyPrefix, "Comments", null, article.Comments);
+            if (!string.IsNullOrEmpty(article.City))            XmlWriter.WriteElementString(bibliographyPrefix, "City", null, article.City);
+            if (!string.IsNullOrEmpty(article.Day))             XmlWriter.WriteElementString(bibliographyPrefix, "Day", null, article.Day);
+            if (!string.IsNullOrEmpty(article.Publisher))       XmlWriter.WriteElementString(bibliographyPrefix, "Publisher", null, article.Publisher);
+            if (!string.IsNullOrEmpty(article.Edition))         XmlWriter.WriteElementString(bibliographyPrefix, "Edition", null, article.Edition);
+            if (!string.IsNullOrEmpty(article.ShortTitle))      XmlWriter.WriteElementString(bibliographyPrefix, "ShortTitle", null, article.ShortTitle);
+            if (!string.IsNullOrEmpty(article.StandardNumber))  XmlWriter.WriteElementString(bibliographyPrefix, "StandardNumber", null, article.StandardNumber);
+            if (!string.IsNullOrEmpty(article.Comments))        XmlWriter.WriteElementString(bibliographyPrefix, "Comments", null, article.Comments);
+
             XmlWriter.WriteElementString(bibliographyPrefix, "JournalName", null, article.JournalName);
+            XmlWriter.WriteEndElement();
         }
 
         private void AddPersons(string groupName, IList<Person> persons)
@@ -167,7 +171,7 @@ namespace MSOfficeBibliographySerializer
             {
                 XmlWriter.WriteStartElement(bibliographyPrefix, "Person", null);
                 XmlWriter.WriteElementString(bibliographyPrefix, "Last", null, person.Last);
-                XmlWriter.WriteElementString(bibliographyPrefix, "Middle", null, person.Middle);
+                if (!string.IsNullOrEmpty(person.Middle)) XmlWriter.WriteElementString(bibliographyPrefix, "Middle", null, person.Middle);
                 XmlWriter.WriteElementString(bibliographyPrefix, "First", null, person.First);
                 XmlWriter.WriteEndElement();
             }
