@@ -1,6 +1,7 @@
 ﻿using BibliographyParser.Internals;
 using Microsoft.Win32;
 using MSOfficeBibliographySerializer;
+using MSOfficeBibliographySerializer.Exceptions;
 using MSOfficeBibliographySerializer.Models;
 using PropertyChanged;
 using System;
@@ -18,6 +19,7 @@ namespace BibliographyParser.ViewModels
             this.BrowseInputCommand = new RelayCommand(BrowseInput);
             this.BrowseOutputCommand = new RelayCommand(BrowseOutput);
             this.StartCommand = new RelayCommand(Start);
+            this.ExitProgramCommand = new RelayCommand(ExitProgram);
         }
 
         public string InputPath { get; set; } = string.Empty;
@@ -27,7 +29,8 @@ namespace BibliographyParser.ViewModels
         public ICommand BrowseInputCommand { get; set; }
         public ICommand BrowseOutputCommand { get; set; }
         public ICommand StartCommand { get; set; } 
-      
+        public ICommand ExitProgramCommand { get; set; }
+
         private void BrowseInput()
         {
             var dialog = new OpenFileDialog()
@@ -89,9 +92,14 @@ namespace BibliographyParser.ViewModels
                     var parser = new JournalArticleParser();
                     sources = parser.ParseFromFile(InputPath);
                 }
+                catch (ParsingException e)
+                {
+                    ResultText = e.Message;
+                    return;
+                }
                 catch (Exception)
                 {
-                    ResultText = "BŁĄD podczas zczytywania pliku .txt";
+                    ResultText = "BŁĄD odczytu wybranego pliku .txt";
                     return;
                 }
 
@@ -108,7 +116,7 @@ namespace BibliographyParser.ViewModels
                 }
                 catch (Exception)
                 {
-                    ResultText = "BŁĄD podczas zapisywania pliku .xml";
+                    ResultText = "BŁĄD zapisu pliku .xml";
                     return;
                 }
             }
@@ -121,6 +129,11 @@ namespace BibliographyParser.ViewModels
             ResultText = "Plik przekonwertowany pomyślnie! :)";
 
             bool PathsSelected() => !string.IsNullOrEmpty(InputPath) && !string.IsNullOrEmpty(OutputPath);
+        }
+
+        private void ExitProgram()
+        {
+            Environment.Exit(0);
         }
     }
 }

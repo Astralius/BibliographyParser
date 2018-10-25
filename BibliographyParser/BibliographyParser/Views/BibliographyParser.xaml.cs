@@ -1,5 +1,6 @@
 ﻿using BibliographyParser.ViewModels;
 using System.Windows;
+using System.Windows.Input;
 
 namespace BibliographyParser.Views
 {
@@ -13,6 +14,14 @@ namespace BibliographyParser.Views
             var viewModel = new BibliographyParserViewModel();
             this.DataContext = viewModel;
             InitializeComponent();
+        }
+
+        protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
+        {
+            base.OnMouseLeftButtonDown(e);
+
+            // Begin dragging the window
+            this.DragMove();
         }
     }
 }

@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Exceptions\ParsingException.cs" />
     <Compile Include="Interfaces\IBibliographyCreator.cs" />
     <Compile Include="Interfaces\IBibliographyParser.cs" />
     <Compile Include="JournalArticleParser.cs" />

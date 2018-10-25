@@ -20,10 +20,10 @@ namespace MSOfficeBibliographySerializer
         public bool Changed { get; private set; }
 
         /// <summary>
-        /// Opens a .xsl file on the specified path for editing and adds necessary heading elements.
+        /// Opens a .xml file on the specified path for editing and adds necessary heading elements.
         /// <para>Must be called before any other <see cref="XMLBibliographyCreator"/>'s method.</para>
         /// </summary>
-        /// <param name="outputPath"></param>
+        /// <param name="outputPath">Absolute path of the XML file to write to.</param>
         public void Initialize(string outputPath)
         {
             if (!IsValidXMLPath(outputPath))

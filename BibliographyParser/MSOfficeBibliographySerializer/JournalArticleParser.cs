@@ -1,4 +1,5 @@
-﻿using MSOfficeBibliographySerializer.Interfaces;
+﻿using MSOfficeBibliographySerializer.Exceptions;
+using MSOfficeBibliographySerializer.Interfaces;
 using MSOfficeBibliographySerializer.Models;
 using MSOfficeBibliographySerializer.Utilities;
 using System;
@@ -21,11 +22,14 @@ namespace MSOfficeBibliographySerializer
         private const string NameMatchingRegex = @"\S+ \S{1,2}";
         private const string PublicationYearMatchingRegex = @" \d{4};";
         private const string IssueMatchingRegex = @"(?<=\()\d+(?=\))";
-        private const string PagesMatchingRegex = @"(?<!\D)(\d+(-{1}\d+)?)(?!\D)";
+        private const string PagesMatchingRegex = @"(\d+-?\d?)";
+        private const string EtAlPartMatchingRegex = @"([ '\-a-zA-ZąęćśłóźżĄĆŚŹŻŁÓĘ]*)(?=\p{P}? et al)";
 
-        private const string NamesSectionErrorText = 
-                    "This does not appear to be a valid " +
-                    "names section of a bibliography record!";
+        private const string InvalidSectionFormatErrorMessage = "Nieprawidłowy format sekcji.";
+        private const string SectionNotFoundErrorMessage = "Nie można odnaleźć sekcji";
+
+        public int CurrentElementNumber { get; private set; }
+        public string CurrentSectionName { get; private set; }
 
         public JournalArticle ParseSingle(string input)
         {
@@ -39,6 +43,8 @@ namespace MSOfficeBibliographySerializer
 
             #region Authors
 
+            CurrentSectionName = "Autorzy";
+
             // until the first dot, everything is names or et al
             var authorsSectionLength = remainder.IndexOf('.') + 1;
             var authorsSection = remainder.Substring(0, authorsSectionLength);
@@ -46,13 +52,15 @@ namespace MSOfficeBibliographySerializer
             remainder = remainder.Remove(0, authorsSectionLength);
 
             #endregion
-            #region Title/Subtitle
+            #region Title
+
+            CurrentSectionName = "Tytuł/podtytuł";
 
             // Since title section can contain dots, we need to skip over to the end of Journal name/year section to find it out.
-            var titleAndJournalNameSectionsLength = GetEndIndexOfPublisherSection(remainder) + 1;
+            var titleAndJournalNameSectionsLength = GetEndIndexOfJournalNameSection(remainder) + 1;
             var titleAndJournalNameSections = remainder.Substring(0, titleAndJournalNameSectionsLength);
 
-            var titleSectionLength = titleAndJournalNameSections.LastIndexOf('.') + 1;
+            var titleSectionLength = titleAndJournalNameSections.LastIndexOfAny(new char[] { '.', '?' }) + 1;
             if (titleSectionLength > 1)
             {
                 result.Title = titleAndJournalNameSections.Substring(0, titleSectionLength).Trim();
@@ -60,11 +68,17 @@ namespace MSOfficeBibliographySerializer
             }
             else
             {
-                throw new ArgumentException("This bibliography entry does not seem to contain the required Title section!");
+                throw new ParsingException(SectionNotFoundErrorMessage)
+                {
+                    ElementNumber = CurrentElementNumber,
+                    SectionName = CurrentSectionName
+                };
             }
 
             #endregion
             #region Year
+
+            CurrentSectionName = "Nazwa czasopisma/rok wydania";
 
             var JournalNameSectionLength = titleAndJournalNameSectionsLength - titleSectionLength;
             if (JournalNameSectionLength > 0)
@@ -79,7 +93,11 @@ namespace MSOfficeBibliographySerializer
             }
             else
             {
-                throw new ArgumentException("This bibliography entry does not seem to contain the required Publisher section!");
+                throw new ParsingException(SectionNotFoundErrorMessage)
+                {
+                    ElementNumber = CurrentElementNumber,
+                    SectionName = CurrentSectionName
+                };
             }
 
             #endregion
@@ -93,16 +111,22 @@ namespace MSOfficeBibliographySerializer
             }
             else
             {
-                throw new ArgumentException("This bibliography entry does not seem to contain the required name of publisher!");
+                throw new ParsingException("Nie można odnaleźć nazwy czasopisma.")
+                {
+                    ElementNumber = CurrentElementNumber,
+                    SectionName = CurrentSectionName
+                };
             }
 
             #endregion
             #region Volume, Issue, Pages
 
+            CurrentSectionName = "Szczegóły (wolumen, wydanie, strony)";
+
             var detailsSectionLength = remainder.IndexOf('.') + 1;
             var detailsSection = remainder.Substring(0, detailsSectionLength);
 
-            var split = detailsSection.Split(new char[] { VolumePagesDelimiter, ItemDelitimer });
+            var split = detailsSection.Split(VolumePagesDelimiter);
             if (split.Length == 2)
             {
                 var issueMatch = Regex.Match(split[0], IssueMatchingRegex);
@@ -124,32 +148,46 @@ namespace MSOfficeBibliographySerializer
                 }
                 else
                 {
-                    throw new ArgumentException("This bibliography entry seems to contain " +
-                        "incorrectly formatted pages range!");
+                    throw new ParsingException("Nieprawidłowy format zakresu stron.")
+                    {
+                        ElementNumber = CurrentElementNumber,
+                        SectionName = CurrentSectionName,
+                        IncorrectValue = split[1]
+                    };
                 }
             }
             else
             {
-                throw new ArgumentException("This bibliography entry seems to contain incorrectly " +
-                    "formatted details section (Volume, Issue, Pages)!");
+                throw new ParsingException(InvalidSectionFormatErrorMessage)
+                {
+                    ElementNumber = CurrentElementNumber,
+                    SectionName = CurrentSectionName,
+                    IncorrectValue = detailsSection
+                };
             }
             remainder = remainder.Remove(0, detailsSectionLength);
 
             #endregion
             #region Other
 
+            CurrentSectionName = "Pozostałe (ostatnia)";
+
             if (remainder.Trim().Length > 0)
             {
                 var otherSplit = remainder.Split(StandardNumberDelimiter);
                 if (otherSplit.Length == 2)
                 {
-                    result.StandardNumber = otherSplit[1].Trim();
-                    result.Comments = otherSplit[2].Trim();
+                    result.StandardNumber = otherSplit[0].Trim();
+                    result.Comments = otherSplit[1].Trim();
                 }
                 else
                 {
-                    throw new ArgumentException("The last section of this bibliography entry " +
-                        "seems to be formatted incorrectly!");
+                    throw new ParsingException(InvalidSectionFormatErrorMessage)
+                    {
+                        ElementNumber = CurrentElementNumber,
+                        SectionName = CurrentSectionName,
+                        IncorrectValue = remainder
+                    };
                 }
             }
 
@@ -157,7 +195,7 @@ namespace MSOfficeBibliographySerializer
 
             return result;
 
-            int GetEndIndexOfPublisherSection(string s1)
+            int GetEndIndexOfJournalNameSection(string s1)
             {
                 var publishedYearMatch = Regex.Match(s1, PublicationYearMatchingRegex);
                 if (publishedYearMatch.Index > 0)
@@ -166,7 +204,11 @@ namespace MSOfficeBibliographySerializer
                 }
                 else
                 {
-                    throw new ArgumentException("Incorrect format of title and/or publisher section(s).");
+                    throw new ParsingException(SectionNotFoundErrorMessage)
+                    {
+                        ElementNumber = CurrentElementNumber,
+                        SectionName = CurrentSectionName,
+                    };
                 }
             }
 
@@ -179,7 +221,12 @@ namespace MSOfficeBibliographySerializer
                 }
                 else
                 {
-                    throw new ArgumentException("The provided input does not seem to contain the required publication year!");
+                    throw new ParsingException("Nie można odnaleźć roku publikacji.")
+                    {
+                        ElementNumber = CurrentElementNumber,
+                        SectionName = CurrentSectionName,
+                        IncorrectValue = s2
+                    };
                 }
             }
 
@@ -187,7 +234,12 @@ namespace MSOfficeBibliographySerializer
             {
                 if (string.IsNullOrEmpty(s3))
                 {
-                    throw new ArgumentException("The provided input does not seem to contain the required volume number!");
+                    throw new ParsingException("Nie można odnaleźć numeru woluminu.")
+                    {
+                        ElementNumber = CurrentElementNumber,
+                        SectionName = CurrentSectionName,
+                        IncorrectValue = s3
+                    };
                 }
                 if (!int.TryParse(s3, out var volume))
                 {
@@ -197,7 +249,12 @@ namespace MSOfficeBibliographySerializer
                     }
                     else
                     {
-                        throw new ArgumentException("The provided input volume number seems to be corrupted!");
+                        throw new ParsingException("Nieprawidłowy format numeru woluminu.")
+                        {
+                            ElementNumber = CurrentElementNumber,
+                            SectionName = CurrentSectionName,
+                            IncorrectValue = s3
+                        };
                     }
                 }
                 return volume;
@@ -230,9 +287,10 @@ namespace MSOfficeBibliographySerializer
 
             var result = new List<JournalArticle>();
             var entries = Regex.Matches(input, EntriesMatchingRegex);
-            foreach (Match entry in entries)
+            for (var index = 0; index < entries.Count; index++)
             {
-                result.Add(ParseSingle(entry.Value));
+                CurrentElementNumber = index + 1;   // display 1-based instead of 0-based
+                result.Add(ParseSingle(entries[index].Value));
             }
             return result;
         }
@@ -247,40 +305,67 @@ namespace MSOfficeBibliographySerializer
 
             if (names.Count == 0)
             {
-                throw new ArgumentException(NamesSectionErrorText);
+                throw new ParsingException(SectionNotFoundErrorMessage)
+                {
+                    ElementNumber = CurrentElementNumber,
+                    SectionName = CurrentSectionName
+                };
             }
 
             foreach (var name in names)
             {
-                if (name.Contains("et al"))
+                var match = Regex.Match(name, EtAlPartMatchingRegex);
+                if (match.Success)
                 {
-                    if (names.Count == 1)
+                    if (match.Value.Length == 0 || names.Count == 1)
                     {
-                        throw new ArgumentException(NamesSectionErrorText);
+                        throw new ParsingException()
+                        {
+                            ElementNumber = CurrentElementNumber,
+                            SectionName = CurrentSectionName,
+                            IncorrectValue = name
+                        };                        
+                    }
+                    else
+                    {
+                        result.Add(ParseSinglePerson(match.Value));
                     }
                     continue;
                 }
-                else if (Regex.IsMatch(name, NameMatchingRegex))
-                {
-                    var split = name.Split(new char[] { ' ' });
-                    var person = new Person
-                    {
-                        Last = split[0],
-                        First = split[1].First().ToString(),
-                        Middle = (split[1].Count() > 1) 
-                                    ? split[1].Substring(1, split[1].Length-1) 
-                                    : string.Empty,
-                        
-                    };
-                    result.Add(person);
-                }
                 else
                 {
-                    throw new ArgumentException(NamesSectionErrorText);
+                    result.Add(ParseSinglePerson(name));
                 }
             }
 
             return result;
+
+            Person ParseSinglePerson(string personString)
+            {
+                if (!string.IsNullOrEmpty(personString) &&
+                    Regex.IsMatch(personString, NameMatchingRegex))
+                {
+                    var split = personString.Split(new char[] { ' ' });
+                    return new Person
+                    {
+                        Last = split[0],
+                        First = split[1].First().ToString(),
+                        Middle = (split[1].Count() > 1)
+                                    ? split[1].Substring(1, split[1].Length - 1)
+                                    : string.Empty,
+
+                    };
+                }
+                else
+                {
+                    throw new ParsingException()
+                    {
+                        ElementNumber = CurrentElementNumber,
+                        SectionName = CurrentSectionName,
+                        IncorrectValue = personString,
+                    };
+                }
+            }
         }
     }
 }
