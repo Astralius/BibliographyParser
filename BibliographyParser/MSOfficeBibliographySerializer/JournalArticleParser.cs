@@ -19,7 +19,7 @@ namespace MSOfficeBibliographySerializer
         private const char StandardNumberDelimiter = ':';
 
         private const string EntriesMatchingRegex = @"(?<=(\d\.[ \t])).{18,}";
-        private const string NameMatchingRegex = @"([\p{Lu}\p{Ll} ]+)(?> )(\p{Lu})(\p{Lu}?)";
+        private const string NameMatchingRegex = @"([\p{Lu}\p{Ll} ]+)(?> )(\p{Lu})(\p{Lu}?)(?!\.)(?>[ ,])?$";
         private const string PublicationYearMatchingRegex = @" \d{4};";
         private const string IssueMatchingRegex = @"(?<=\()\d+(?=\))";
         private const string PagesMatchingRegex = @"(\d+-?\d?)";
