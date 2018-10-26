@@ -7,7 +7,7 @@ namespace MSOfficeBibliographySerializer.Models
 {
     public abstract class Source
     {
-        private static readonly List<string> TagsInUse = new List<string>();
+        public static readonly List<string> TagsInUse = new List<string>();
         
         public string Guid { get; set; } = $"{{{System.Guid.NewGuid().ToString().ToUpper()}}}";
         public SourceType Type { get; protected set; }
@@ -25,6 +25,11 @@ namespace MSOfficeBibliographySerializer.Models
         public int Volume { get; set; }
 
         private string currentTag;
+
+        public static void ResetTagsList()
+        {
+            TagsInUse.Clear();
+        }
 
         private string ComposeTag()
         {

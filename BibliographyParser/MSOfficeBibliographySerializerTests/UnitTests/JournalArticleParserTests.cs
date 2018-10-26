@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MSOfficeBibliographySerializer;
+using MSOfficeBibliographySerializer.Exceptions;
 using System;
 using System.Text;
 
@@ -34,7 +35,7 @@ namespace MSOfficeBibliographySerializerTests.UnitTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ParsingException))]
         public void ParseSingle_InvalidFormat_Throws()
         {
             parser.ParseSingle(InvalidEntry);
@@ -61,11 +62,11 @@ namespace MSOfficeBibliographySerializerTests.UnitTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ParsingException))]
         public void ParseMultiple_OneValidOneInvalid_Throws()
         {
             var builder = new StringBuilder();
-            builder.Append($"1.  {ValidEntry}");
+            builder.Append($"1. {ValidEntry}");
             builder.AppendLine();
             builder.Append($"2. {InvalidEntry}");
 
@@ -76,9 +77,9 @@ namespace MSOfficeBibliographySerializerTests.UnitTests
         public void ParseMultiple_ValidEntries_Passes()
         {
             var builder = new StringBuilder();
-            builder.Append($"1.  {ValidEntry}");
+            builder.Append($"1. {ValidEntry}");
             builder.AppendLine();
-            builder.Append($"2.  {ValidEntry}");
+            builder.Append($"2. {ValidEntry}");
 
             parser.ParseMultiple(builder.ToString());
         }

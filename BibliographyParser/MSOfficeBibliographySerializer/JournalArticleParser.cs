@@ -19,11 +19,11 @@ namespace MSOfficeBibliographySerializer
         private const char StandardNumberDelimiter = ':';
 
         private const string EntriesMatchingRegex = @"(?<=(\d\.[ \t])).{18,}";
-        private const string NameMatchingRegex = @"\S+ \S{1,2}";
+        private const string NameMatchingRegex = @"([\p{Lu}\p{Ll} ]+)(?> )(\p{Lu})(\p{Lu}?)";
         private const string PublicationYearMatchingRegex = @" \d{4};";
         private const string IssueMatchingRegex = @"(?<=\()\d+(?=\))";
         private const string PagesMatchingRegex = @"(\d+-?\d?)";
-        private const string EtAlPartMatchingRegex = @"([ '\-a-zA-ZąęćśłóźżĄĆŚŹŻŁÓĘ]*)(?=\p{P}? et al)";
+        private const string EtAlPartMatchingRegex = @".*(?=et al)";
 
         private const string InvalidSectionFormatErrorMessage = "Nieprawidłowy format sekcji.";
         private const string SectionNotFoundErrorMessage = "Nie można odnaleźć sekcji";
@@ -317,7 +317,11 @@ namespace MSOfficeBibliographySerializer
                 var match = Regex.Match(name, EtAlPartMatchingRegex);
                 if (match.Success)
                 {
-                    if (match.Value.Length == 0 || names.Count == 1)
+                    if (match.Value.Length > 0)
+                    {
+                        result.Add(ParseSinglePerson(match.Value));
+                    }
+                    else if (names.Count == 1)
                     {
                         throw new ParsingException()
                         {
@@ -325,10 +329,6 @@ namespace MSOfficeBibliographySerializer
                             SectionName = CurrentSectionName,
                             IncorrectValue = name
                         };                        
-                    }
-                    else
-                    {
-                        result.Add(ParseSinglePerson(match.Value));
                     }
                     continue;
                 }
@@ -342,18 +342,17 @@ namespace MSOfficeBibliographySerializer
 
             Person ParseSinglePerson(string personString)
             {
+                var match = Regex.Match(personString, NameMatchingRegex);
                 if (!string.IsNullOrEmpty(personString) &&
-                    Regex.IsMatch(personString, NameMatchingRegex))
+                    match.Success)
                 {
-                    var split = personString.Split(new char[] { ' ' });
                     return new Person
                     {
-                        Last = split[0],
-                        First = split[1].First().ToString(),
-                        Middle = (split[1].Count() > 1)
-                                    ? split[1].Substring(1, split[1].Length - 1)
-                                    : string.Empty,
-
+                        Last = match.Groups[1].Value,
+                        First = match.Groups[2].Value,
+                        Middle = (match.Groups.Count == 4)
+                                    ? match.Groups[3].Value
+                                    : string.Empty
                     };
                 }
                 else
