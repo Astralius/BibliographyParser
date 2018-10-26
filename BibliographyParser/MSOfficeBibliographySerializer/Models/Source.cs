@@ -7,13 +7,13 @@ namespace MSOfficeBibliographySerializer.Models
 {
     public abstract class Source
     {
-        private static readonly List<string> Tags = new List<string>();
-
+        private static readonly List<string> TagsInUse = new List<string>();
+        
         public string Guid { get; set; } = $"{{{System.Guid.NewGuid().ToString().ToUpper()}}}";
         public SourceType Type { get; protected set; }
         public IList<Person> Authors { get; set; } = new List<Person>();
         public IList<Person> Editors { get; set; } = new List<Person>();
-        public string Tag => ComposeTag();      
+        public string Tag => (string.IsNullOrEmpty(currentTag)) ? ComposeTag() : currentTag;      
         public string Title { get; set; }
         public string ShortTitle { get; set; }
         public string Publisher { get; set; }
@@ -24,9 +24,11 @@ namespace MSOfficeBibliographySerializer.Models
         public string Comments { get; set; }
         public int Volume { get; set; }
 
+        private string currentTag;
+
         private string ComposeTag()
         {
-            var result = GetUniqueTag("Tag");
+            var result = "ERROR_Tag";
 
             var firstAuthor = this.Authors.FirstOrDefault();
             if (firstAuthor != null)
@@ -37,30 +39,35 @@ namespace MSOfficeBibliographySerializer.Models
                 {
                     var namesSubstringLength = (namesCombined.Length < 3) ? namesCombined.Length : 3;
                     var yearSubstringLength = (yearStringLength < 2) ? yearStringLength : 2;
-                    result = this.GetUniqueTag(
+
+                    result = this.MakeUniqueTag(
                         $"{namesCombined.Substring(0, namesSubstringLength)}" +
                         $"{this.Year.Substring(yearStringLength - yearSubstringLength) }");
+
+                    currentTag = result;
                 }
             }
+
             return result;
         }
         
-        private string GetUniqueTag(string tag)
-        {
-            if (tag != null)
+        private string MakeUniqueTag(string baseTag)
+        {       
+            if (baseTag != null)
             {
                 var suffix = 0;
-                while (Tags.Contains(tag) || tag.Equals(string.Empty))
+                var result = baseTag;
+                while (TagsInUse.Contains(result) || result.Equals(string.Empty))
                 {
-                    suffix += 1;
-                    tag += suffix;
+                    result = baseTag + ++suffix;
                 }
-                return tag;
+                TagsInUse.Add(result);                    
+                return result;                  
             }
             else
             {
                 throw new ArgumentException("Null is not a valid argument for this method!");
-            }
+            }          
         }
     }
 }
