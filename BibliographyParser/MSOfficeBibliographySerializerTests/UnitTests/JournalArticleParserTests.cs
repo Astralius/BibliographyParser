@@ -10,7 +10,7 @@ namespace MSOfficeBibliographySerializerTests.UnitTests
     public class JournalArticleParserTests
     {
         private const string InvalidEntry = "Nwaru BI, Hickstein L, Panesar SS, Roberts G, Muraro A and Sheikh A on behalf of the EAACI Food Allergy and Anaphylaxis Guidelines Group. Prevalence of common food allergies in Europe: a systematic review and meta-analysis. Allergy 2014; DOI:10.1111/all.12423.";
-        private const string ValidEntry = "Koletzko S, Niggemann B, Arato A, et al. European Society of Pediatric Gastroenterology, Hepatology, and Nutrition. Diagnostic approach and management of cow-s-milk protein allergy in infants and children: ESPGHAN GI Committee practical guidelines. J Pediatr Gastroenterol Nutr 2012;55:221-229.";
+        private const string ValidEntry = "Koletzko-Tetzko S, Niggemann B, Arato A, European Society of Pediatric Gastroenterology, Hepatology, and Nutrition. Diagnostic approach and management of cow-s-milk protein allergy in infants and children: ESPGHAN GI Committee practical guidelines. J Pediatr Gastroenterol Nutr 2012;55:221-229.";
 
         private JournalArticleParser parser;
 

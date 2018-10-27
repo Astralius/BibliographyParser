@@ -19,7 +19,7 @@ namespace MSOfficeBibliographySerializer
         private const char StandardNumberDelimiter = ':';
 
         private const string EntriesMatchingRegex = @"(?<=(\d\.[ \t])).{18,}";
-        private const string NameMatchingRegex = @"([\p{Lu}\p{Ll} ]+)(?> )(\p{Lu})(\p{Lu}?)(?!\.)(?>[ ,])?$";
+        private const string NameMatchingRegex = @"([\p{Lu}\p{Ll}-' ]+)(?> )(\p{Lu})(\p{Lu}?)(?!\.)(?>[ ,])?$";
         private const string PublicationYearMatchingRegex = @" \d{4};";
         private const string IssueMatchingRegex = @"(?<=\()\d+(?=\))";
         private const string PagesMatchingRegex = @"(\d+-?\d?)";
@@ -342,27 +342,37 @@ namespace MSOfficeBibliographySerializer
 
             Person ParseSinglePerson(string personString)
             {
-                var match = Regex.Match(personString, NameMatchingRegex);
-                if (!string.IsNullOrEmpty(personString) &&
-                    match.Success)
+                if (!string.IsNullOrEmpty(personString))
                 {
-                    return new Person
+                    if (personString.EndsWith("."))
                     {
-                        Last = match.Groups[1].Value,
-                        First = match.Groups[2].Value,
-                        Middle = (match.Groups.Count == 4)
-                                    ? match.Groups[3].Value
-                                    : string.Empty
-                    };
+                        personString = personString.Remove(personString.Length - 1, 1);
+                    }
+                    var match = Regex.Match(personString, NameMatchingRegex);
+                    if (match.Success)
+                    {
+                        return new Person
+                        {
+                            Last = match.Groups[1].Value,
+                            First = match.Groups[2].Value,
+                            Middle = (match.Groups.Count == 4)
+                                        ? match.Groups[3].Value
+                                        : string.Empty
+                        };
+                    }
+                    else
+                    {
+                        throw new ParsingException()
+                        {
+                            ElementNumber = CurrentElementNumber,
+                            SectionName = CurrentSectionName,
+                            IncorrectValue = personString,
+                        };
+                    }
                 }
                 else
                 {
-                    throw new ParsingException()
-                    {
-                        ElementNumber = CurrentElementNumber,
-                        SectionName = CurrentSectionName,
-                        IncorrectValue = personString,
-                    };
+                    throw new ArgumentException($"{nameof(personString)} cannot be null/empty!");
                 }
             }
         }
